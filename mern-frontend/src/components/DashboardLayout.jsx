@@ -5,7 +5,7 @@ const DashboardLayout = ({ children }) => {
   const currentDate = new Date().toLocaleString();
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen p-6 bg-white rounded">
       <header className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Visitor Management System</h1>

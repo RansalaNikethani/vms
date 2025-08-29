@@ -7,6 +7,14 @@
 .tab.active {
   @apply bg-blue-500 text-white;
 }
+.input {
+  @apply w-full p-2 border border-gray-300 rounded;
+}
+.btn {
+  @apply px-4 py-2 rounded-md bg-white text-gray-700 border mr-4 hover:bg-blue-500 hover:text-white ;
+}
+
+
 
 /*#root {
   max-width: 1280px;

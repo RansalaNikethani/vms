@@ -1,4 +1,4 @@
-/*import { useState } from 'react';
+import { useState } from 'react';
 import NavTabs from '../components/NavTabs';
 import VisitorTypeSelector from '../components/VisitorTypeSelector';
 import PersonalDetails from '../components/steps/PersonalDetails';
@@ -7,10 +7,10 @@ import VisitingPurpose from '../components/steps/VisitingPurpose';
 import SelectDivision from '../components/steps/SelectDivision';
 import IssueToken from '../components/steps/IssueToken';
 import NotifyEmployee from '../components/steps/NotifyEmployee';
+import CheckCircleIcon from '../components/iconset/CheckCircleIcon';
 import { toast } from 'react-toastify';
 
 const steps = [
-  { id: 0, label: 'Visitor Type' },
   { id: 1, label: 'Personal Details' },
   { id: 2, label: 'Visiting Purpose' },
   { id: 3, label: 'Select Division' },
@@ -18,15 +18,16 @@ const steps = [
   { id: 5, label: 'Notify Employee' },
 ];
 
-const RegisterVisitor = () => {
-  const [step, setStep] = useState(0);
+
+const IssueTokenPage = () => {
+  const [step, setStep] = useState(1);
   const [visitorType, setVisitorType] = useState(null); // 'new' or 'pre'
   const [visitorData, setVisitorData] = useState({});
   const [completedSteps, setCompletedSteps] = useState([]);
 
   const markStepComplete = (stepId) => {
     if (!completedSteps.includes(stepId)) {
-      setCompletedSteps([...completedSteps, stepId]);
+      setCompletedSteps((prev) => [...prev, stepId]);
     }
   };
 
@@ -34,17 +35,7 @@ const RegisterVisitor = () => {
   const prevStep = () => setStep((prev) => prev - 1);
 
   const renderStepComponent = () => {
-    if (step === 0) {
-      return (
-        <VisitorTypeSelector
-          onSelect={(type) => {
-            setVisitorType(type);
-            markStepComplete(0);
-            setStep(1);
-          }}
-        />
-      );
-    }
+    if (!visitorType) return null;
 
     if (visitorType === 'new' && step === 1) {
       return (
@@ -106,7 +97,7 @@ const RegisterVisitor = () => {
           visitorData={visitorData}
           onNext={() => {
             markStepComplete(4);
-            nextStep();
+            nextStep(); // ✅ This moves to step 5
           }}
           onBack={prevStep}
         />
@@ -127,49 +118,76 @@ const RegisterVisitor = () => {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen rounded-2xl">
-      <h2 className="text-2xl font-bold mb-4">Register Visitor</h2>
+      {/* Visitor Type Selector */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">Visitor Type</h2>
 
-      {/* Step Tabs *///}
-      /*<div className="flex space-x-2 mb-6">
-        {steps.map((s) => {
-          const isCompleted = completedSteps.includes(s.id);
-          const isDisabled = s.id > Math.max(...completedSteps, 0);
-
-          return (
+        {!visitorType ? (
+          <VisitorTypeSelector
+            onSelect={(type) => {
+              setVisitorType(type);
+              setStep(1);
+              setCompletedSteps([]);
+              setVisitorData({});
+              toast.success(`Selected: ${type === 'new' ? 'New Visitor' : 'Pre-Registered Visitor'}`);
+            }}
+          />
+        ) : (
+          <div className="flex items-center justify-between bg-white p-4 rounded shadow">
+            <p className="text-gray-700">
+              Selected: <strong>{visitorType === 'new' ? 'New Visitor' : 'Pre-Registered Visitor'}</strong>
+            </p>
             <button
-              key={s.id}
-              onClick={() => !isDisabled && setStep(s.id)}
-              className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 ${
-                step === s.id
-                  ? 'bg-blue-500 text-white'
-                  : isDisabled
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 border'
-              }`}
-              disabled={isDisabled}
+              onClick={() => {
+                setVisitorType(null);
+                setStep(1);
+                setCompletedSteps([]);
+                setVisitorData({});
+                toast.info('Visitor type reset');
+              }}
+              className="text-sm text-blue-500 hover:underline"
             >
-              {s.label}
-              {isCompleted && <span className="text-green-500">✅</span>}
+              Change Visitor Type
             </button>
-          );
-        })}
+          </div>
+        )}
       </div>
 
-      {/* Step Content *//*}
-     // {/* <div className="bg-white p-4 rounded-lg shadow">{renderStepComponent()}</div> *///}
-    //</div>
-//  );
-//};*/
+      {/* Step Tabs */}
+      {visitorType && (
+        <div className="flex space-x-2 mb-6">
+          {steps.map((s) => {
+            const isCompleted = completedSteps.includes(s.id);
+            const isAccessible = s.id === step || completedSteps.includes(s.id);
 
-//export default RegisterVisitor;
 
-const RegisterVisitor = () => {
-  return (
-    <div>
-      <h2>Register Visitor</h2>
-      {/* Registration form goes here */}
+            return (
+              <button
+                key={s.id}
+                onClick={() => isAccessible && setStep(s.id)}
+                className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 ${
+                  step === s.id
+                    ? 'bg-blue-500 text-white'
+                    : isAccessible
+                    ? 'bg-white text-gray-700 border hover:bg-blue-50'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+                disabled={!isAccessible}
+              >
+                {s.label}
+                {isCompleted && <span className="text-green-500">
+                  <CheckCircleIcon />
+                </span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Step Content */}
+      <div className="bg-white p-4 rounded-lg shadow">{renderStepComponent()}</div>
     </div>
   );
 };
 
-export default RegisterVisitor;
+export default IssueTokenPage;

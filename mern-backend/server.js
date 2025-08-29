@@ -1,46 +1,22 @@
-const express = require("express");
-const mongoose = require("mongoose");
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
+app.use(cors());
+app.use(express.json());
 
-app.use(express.json()); //middleware function
+console.log('Mongo URI:', process.env.MONGO_URI);
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-//connection to our database.
-mongoose
-  .connect("mongodb://localhost:27017/vms")
-  .then(() => console.log("Connected to MongoDB!"))
-  .catch(err => console.error("Could not connect to MongoDB...", err));
 
-//create visitor schema
-const VisitorSchema = new mongoose.Schema({
-    name: String,
-    nic: String,
-    contact: String,
-    address: String,
-    email: String,
-    company: String,
-});
+// Routes
+app.use('/api/visitors', require('./routes/visitorRoutes'));
 
-//create visitor Model
-const Visitor = new mongoose.model("Visitor", VisitorSchema);
 
-app.post('/api/visitors', (req,res) => {
-    Visitor.create(req.body)
-        .then((visitor) => res.status(201).send(visitor))
-        .catch((err) => res.status(400).send("Error saving visitor"))
-});
-
-app.get('/api/visitors', (req, res) => {
-    Visitor.find()
-        .then((visitors) => res.status(200).send(visitors))
-        .catch((err) => res.status(500).send("Error fetching visitors"))
-});
-
-  // our endpoint
-app.get('/', (req, res) => {
-    res.send("hello this is response");
-});
-
-app.listen(8000, () => {
-    console.log("Server is running on port 8000");
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
